@@ -1,7 +1,7 @@
 /* The following program is meant to work as a solver for the Wordle game.
 
-How does it work: -> it communicates with the Wordle game through build/communication.txt
-                  -> communication.txt is used as both input and output
+How does it work: -> it communicates with the Wordle game through a shared communication file
+                  -> the communication file path can be passed as a command-line argument
                   -> the solver waits for a base-3 pattern so it can calculate the next optimal guess
                   -> once the Python game closes, the solver closes as well
 
@@ -25,12 +25,12 @@ Why did we write the solver in C++? -> efficiency and familiarity with the langu
 
 //this function will continuously read
 // from communication.txt until the Python game provides a base 3 number or a "termination string"
-int get_pattern() {
+int get_pattern(const std::string& communication_file) {
       std::ifstream f;
       std::string DataDump;
       //read till smth. happens
       while(true) {
-            f.open("build/communication.txt");
+            f.open(communication_file);
             f >> DataDump;
             f.close();
 
@@ -50,9 +50,9 @@ int get_pattern() {
 
 //push the optimal word to the Python game after calculating the optimal guess
 //used to clear up the code a bit
-void push_wordle(std::string woptim) {
+void push_wordle(const std::string& communication_file, std::string woptim) {
       std::ofstream g;
-      g.open("build/communication.txt");
+      g.open(communication_file);
 
       g << woptim;
       g.close();
@@ -60,9 +60,9 @@ void push_wordle(std::string woptim) {
 
 //reads all the words that will be allowed in the game
 //used to clear up the code a bit
-void read_wordle_dictionary(std::string wordle_dictionary[], int& n) {
+void read_wordle_dictionary(const std::string& word_list_file, std::string wordle_dictionary[], int& n) {
       std::ifstream f;
-      f.open("data/cuvinte_wordle.txt");
+      f.open(word_list_file);
       
       while(f >> wordle_dictionary[++n]);
       --n;
@@ -136,25 +136,28 @@ int newSet(int n, int pattern, std::string wd[], std::string woptim) {
       return newN;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+      std::string communication_file = argc >= 2 ? argv[1] : "build/communication.txt";
+      std::string word_list_file = argc >= 3 ? argv[2] : "data/cuvinte_wordle.txt";
+
       int m = 0;
       std::string wordle_dictionary[15000];
-      read_wordle_dictionary(wordle_dictionary, m);
+      read_wordle_dictionary(word_list_file, wordle_dictionary, m);
 
       int n = m;
       // we will always find that is optimal to start with "TAREI", so we always start with "TAREI"
       std::string woptim = "TAREI";
-      push_wordle(woptim);
+      push_wordle(communication_file, woptim);
 
       int pattern;
-      pattern = get_pattern();
+      pattern = get_pattern(communication_file);
       n = newSet(m, pattern, wordle_dictionary, woptim);
 
       while(n != 0) {
             woptim = optimal_word_find(wordle_dictionary, m, n);
-            push_wordle(woptim);
+            push_wordle(communication_file, woptim);
 
-            pattern = get_pattern();
+            pattern = get_pattern(communication_file);
             n = newSet(n, pattern, wordle_dictionary, woptim);
             if(pattern == 242) {
                   break;

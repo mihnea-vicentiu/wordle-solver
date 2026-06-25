@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import pygame
 
 from wordle_game.dictionary import wordle_dictionary
-from wordle_game.paths import PROJECT_ROOT, SOLVER_BINARY, SOLVER_SOURCE, ensure_runtime_dirs
+from wordle_game.paths import COMMUNICATION_FILE, PROJECT_ROOT, SOLVER_BINARY, SOLVER_SOURCE, WORD_LIST_FILE, ensure_runtime_dirs
 from wordle_game.ui.animations import Animations
 from wordle_game.ui.colors import reset_colors
 from wordle_game.ui.interactor import clear_data, get_word, outcome, push_exit
@@ -120,8 +120,11 @@ def play_manual(target_word=None):
 
 def ensure_solver_built():
       ensure_runtime_dirs()
-      if SOLVER_BINARY.exists() and SOLVER_BINARY.stat().st_mtime >= SOLVER_SOURCE.stat().st_mtime:
+      if SOLVER_BINARY.exists() and (not SOLVER_SOURCE.exists() or SOLVER_BINARY.stat().st_mtime >= SOLVER_SOURCE.stat().st_mtime):
             return
+
+      if not SOLVER_SOURCE.exists():
+            raise RuntimeError("The packaged solver binary is missing.")
 
       compile_cmd = ["g++", str(SOLVER_SOURCE), "-O2", "-std=c++17", "-o", str(SOLVER_BINARY)]
       try:
@@ -135,7 +138,7 @@ def ensure_solver_built():
 def start_solver_process():
       ensure_solver_built()
       clear_data()
-      return subprocess.Popen([str(SOLVER_BINARY)], cwd=PROJECT_ROOT)
+      return subprocess.Popen([str(SOLVER_BINARY), str(COMMUNICATION_FILE), str(WORD_LIST_FILE)], cwd=PROJECT_ROOT)
 
 
 def finish_solver_process(process):

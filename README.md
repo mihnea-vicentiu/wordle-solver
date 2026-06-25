@@ -76,6 +76,22 @@ mkdir -p build
 g++ solver/solver.cpp -O2 -std=c++17 -o build/solver
 ```
 
+## Release Builds
+
+GitHub Actions can create release bundles for the two main app modes:
+
+- `wordle-manual-linux.zip`, which opens manual play;
+- `wordle-solver-loop-linux.zip`, which opens the continuous solver loop.
+
+Create and push a version tag to trigger a release:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow can also be started manually from the GitHub Actions tab.
+
 ## Project Structure
 
 ```text

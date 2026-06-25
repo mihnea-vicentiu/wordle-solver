@@ -1,0 +1,71 @@
+name: Release game builds
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, for example v1.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux release artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: Compile solver
+        run: |
+          mkdir -p build
+          g++ solver/solver.cpp -O2 -std=c++17 -o build/solver
+
+      - name: Build manual game executable
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed \
+            --name wordle-manual \
+            --add-data "assets:assets" \
+            --add-data "data:data" \
+            wordle_game/play_app.py
+
+      - name: Build solver loop executable
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed \
+            --name wordle-solver-loop \
+            --add-data "assets:assets" \
+            --add-data "data:data" \
+            --add-data "build/solver:build" \
+            wordle_game/solver_loop_app.py
+
+      - name: Package release artifacts
+        run: |
+          mkdir -p release
+          zip -j release/wordle-manual-linux.zip dist/wordle-manual
+          zip -j release/wordle-solver-loop-linux.zip dist/wordle-solver-loop
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          files: |
+            release/wordle-manual-linux.zip
+            release/wordle-solver-loop-linux.zip
+          generate_release_notes: true
