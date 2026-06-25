@@ -1,5 +1,4 @@
-import pygame
-from assets.colors import colorTemp, colorTile
+from wordle_game.ui.colors import colorTemp, colorTile
 
 #this class will be used to draw the animation of the Worlde game
 #the animations can be turned off
@@ -104,7 +103,7 @@ class Animations:
 
       #used for drawing the aniamtion when an invalid word is being introduced as a guess
       """
-      this animation is not used in the game.py but it is used in shell.py
+      this animation is used by the manual play workflow for invalid guesses
       to describe the basic process of how we draw the animation:
             we basically shift the position of the cells form left to right and the position of the letters in the cells as well using
             the matrix offset

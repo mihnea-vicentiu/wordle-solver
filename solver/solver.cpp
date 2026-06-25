@@ -1,18 +1,17 @@
-/* The following program is ment to work as a solver for the wordle game
+/* The following program is meant to work as a solver for the Wordle game.
 
-How does it work: -> it communicates with the wordle game troughout communication.txt
-                  -> communication.txt is used both as input and output be that a non-standardized coding convention
-                  -> the solver awaits a base 3 number such that it can calculate the next optimal word the can be used for the next guess
-                  -> once the game.py is closed, solver.exe should close as well
+How does it work: -> it communicates with the Wordle game through build/communication.txt
+                  -> communication.txt is used as both input and output
+                  -> the solver waits for a base-3 pattern so it can calculate the next optimal guess
+                  -> once the Python game closes, the solver closes as well
 
-How it calculates the entropy: -> We calculate the entropy of a word by checking it in raport with every other word, we check what patern will be given if we guess
-the first word, and the word to be guessed is every other word then we count every patern appearance, then we use the formula: 
-S = P(0) / n * log2(n / P(0)) + P(1) / n * log2(n / P(1)) + ...... + P(242) / n log2(n / P(242)), where P(k) is the number of apappearances of every patern
-and n is the total number of words, then we guess the optimal word, and check what words give the same patern in raport with our guess and create a smaller set,
-then we repet the steps on a the smaller set until we get the word that we had to guess.
+How it calculates the entropy: -> We calculate the entropy of a word by comparing it with every other possible target.
+Each comparison produces one of 243 possible patterns. We count the pattern appearances, then use the formula:
+S = P(0) / n * log2(n / P(0)) + P(1) / n * log2(n / P(1)) + ...... + P(242) / n log2(n / P(242)), where P(k) is the number of appearances of each pattern.
+After guessing the optimal word, we keep only the words that give the same pattern and repeat the process.
 
 
-Why did we write the solver in cpp? -> well because of the efficiency that it offers and familiarity with the language
+Why did we write the solver in C++? -> efficiency and familiarity with the language.
 */
 
 //libraries that we need for the solver
@@ -21,27 +20,26 @@ Why did we write the solver in cpp? -> well because of the efficiency that it of
 #include <math.h>
 #include <iostream>
 
-//pragma opitimization to imporve the performance a bit (hopefully :_())
+//pragma optimization to improve performance a bit
 #pragma GCC optimize("Ofast,unroll-loops")
 
-//this function will continueously read 
-// from communication.txt untill game.py provides a base 3 number or a "termination string"
+//this function will continuously read
+// from communication.txt until the Python game provides a base 3 number or a "termination string"
 int get_pattern() {
       std::ifstream f;
       std::string DataDump;
       //read till smth. happens
       while(true) {
-            f.open("communication.txt");
+            f.open("build/communication.txt");
             f >> DataDump;
             f.close();
 
-            //if from communication.txt we recive "---" then we know that we should stop here because game.py was stoped
+            //if from communication.txt we receive "---" then we know that the game was stopped
             if(DataDump == "---") {
                   exit(0);
             }
 
-            //since we know what type of date we send and recive from communication.txt we will know that
-            //when we recive an input with length less than or equal to 3 that we have an input from game.py
+            //a pattern is encoded as a base-10 number with at most 3 digits
             if(DataDump.length() <= 3) {
                   return stoi(DataDump);
             }
@@ -50,21 +48,21 @@ int get_pattern() {
       return -1;
 }
 
-//push the optimal word to game.py after calculating the optimal guess
+//push the optimal word to the Python game after calculating the optimal guess
 //used to clear up the code a bit
 void push_wordle(std::string woptim) {
       std::ofstream g;
-      g.open("communication.txt");
+      g.open("build/communication.txt");
 
       g << woptim;
       g.close();
 }
 
-//reads all the words that will be allowed in game.py
+//reads all the words that will be allowed in the game
 //used to clear up the code a bit
 void read_wordle_dictionary(std::string wordle_dictionary[], int& n) {
       std::ifstream f;
-      f.open("cuvinte_wordle.txt");
+      f.open("data/cuvinte_wordle.txt");
       
       while(f >> wordle_dictionary[++n]);
       --n;

@@ -18,3 +18,12 @@ colorTemp = [colors_arr[7] for i in range(10)]
 
 #this grid will tell what each tile color should be throughout the Worlde game
 colorTile = [[colors_arr[7] for i in range(10)] for i in range(10)]
+
+
+def reset_colors():
+      for i in range(len(colorTemp)):
+            colorTemp[i] = colors_arr[7]
+
+      for i in range(len(colorTile)):
+            for j in range(len(colorTile[i])):
+                  colorTile[i][j] = colors_arr[7]

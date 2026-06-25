@@ -1,28 +1,22 @@
-from assets.colors import *
+from wordle_game.paths import COMMUNICATION_FILE
+from wordle_game.ui.colors import colorTemp, colors_arr
 
 #create a new file
 def clear_data():
-      open("communication.txt", "w").close()
+      COMMUNICATION_FILE.write_text("")
 
 
 #get guess form the solver
 def get_word():
-      f = open("communication.txt", "r")
-      guess = f.read()
-      f.close()
-      return guess
+      return COMMUNICATION_FILE.read_text()
 
 #push base 3 code to the solver
 def push_code(code):
-      g = open("communication.txt", "w")
-      g.write(str(code))
-      g.close()
+      COMMUNICATION_FILE.write_text(str(code))
 
 #tell the solver to "shut down" the process has ended
 def push_exit():
-      g = open("communication.txt", "w")
-      g.write('---')
-      g.close()
+      COMMUNICATION_FILE.write_text('---')
 
 #generate an output to communicate with the solver
 def outcome(wordle, guess):

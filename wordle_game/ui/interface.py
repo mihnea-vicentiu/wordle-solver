@@ -4,19 +4,21 @@ TLDR; most of this functions were implemented in assets.animations but after som
 It handles events and basic window mangements
 """
 import pygame
-from assets.colors import *
-from assets.interactor import *
+from wordle_game.paths import IMAGES_DIR
+from wordle_game.ui.colors import colors_arr
+from wordle_game.ui.interactor import push_exit
 
 class GameConfig:
-      def __init__(self):
+      def __init__(self, uses_solver=False):
+            self.uses_solver = uses_solver
             #here we initialize the game window
             self.screen = pygame.display.set_mode((800, 700))
             pygame.display.set_caption("Wordle!")
-            icon = pygame.image.load("assets/imgs/icon.png")
+            icon = pygame.image.load(str(IMAGES_DIR / "Icon.png"))
             pygame.display.set_icon(icon)
 
             #title of the game
-            self.title = pygame.image.load("assets/imgs/title.png").convert()
+            self.title = pygame.image.load(str(IMAGES_DIR / "title.png")).convert()
             #font of each letter/to be able to use it dowload each .ttf from the zip attachement in assets/font
             self.font = pygame.font.SysFont('Clear Sans', 40)
             #clock is used to drag out the animation of the wordle game
@@ -67,9 +69,8 @@ class GameConfig:
              for event in pygame.event.get():
                   #click on the X to close the program
                   if event.type == pygame.QUIT:
-                        push_exit()
+                        if self.uses_solver:
+                              push_exit()
                         pygame.quit()
                         exit()
-
-
 

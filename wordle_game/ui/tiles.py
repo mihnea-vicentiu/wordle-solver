@@ -1,6 +1,5 @@
 import pygame
-import time
-from assets.colors import colors_arr, colorTile
+from wordle_game.ui.colors import colors_arr, colorTile
 
 """
 Tiles draws each a 5x6 grid on the screen and has limited use for animations/drawing purposes
